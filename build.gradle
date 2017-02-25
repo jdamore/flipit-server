@@ -1,0 +1,59 @@
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven { url "https://repo.spring.io/snapshot" }
+    maven { url "https://repo.spring.io/milestone" }
+}
+
+defaultTasks 'clean', 'build', 'bootRepackage', 'run'
+
+jar {
+    baseName = 'flipit-server'
+    version =  '0.0.1'
+    destinationDir = new File("$projectDir/target")
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.1.RELEASE")
+    }
+}
+
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web") {
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
+    }
+    compile(
+            "org.springframework.boot:spring-boot-starter-jetty",
+            "org.springframework.boot:spring-boot-starter-actuator"
+    )
+    testCompile(
+            "junit:junit",
+            "org.springframework.boot:spring-boot-starter-test"
+    )
+}
+
+clean {
+    delete "$projectDir/target"
+    delete "$projectDir/build"
+}
+
+task run << {
+    exec {
+        executable "java"
+        args "-Dspring.profiles.active=$System.env.FLIPIT_SERVER_ENV", "-jar", "target/flipit-server-0.0.1.jar"
+    }
+}
